@@ -1,0 +1,213 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>  
+<html lang="en">  
+<head>  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1.0">  
+<title>Image Upload</title>  
+<style>  
+    body {  
+        margin: 0;  
+        padding: 0;  
+        background: #0077DD;  
+        font-family: Arial, sans-serif;  
+        display: flex;  
+        justify-content: center;  
+        align-items: center;  
+        height: 100vh;  
+    }  
+  
+    .box {  
+        width: calc(100% - 20px); /* 10px left + 10px right */  
+        max-width: 350px;  
+        background: #ffffff;  
+        padding: 20px;  
+        border-radius: 12px;  
+        text-align: center;  
+        margin: 0 10px; /* SIDE MARGIN */  
+    }  
+  
+    .title {  
+        font-size: 16px;  
+        font-weight: bold;  
+        margin-top: 5px;  
+        color: #000;  
+    }  
+  
+    .subtext {  
+        font-size: 12px;  
+        margin-top: 5px;  
+        color: #333;  
+    }  
+  
+    button {  
+        width: 100%;  
+        padding: 10px;  
+        margin-top: 25px;  
+        background: #FF7043;  
+        color: #fff;  
+        font-size: 12px;  
+        font-weight: bold;  
+        border: none;  
+        border-radius: 6px;  
+        cursor: pointer;  
+    }  
+  
+    #imageURL {  
+        margin-top: 15px;  
+        padding: 8px;  
+        width: 100%;  
+        background: #f0f0f0;  
+        border: 1px solid #ccc;  
+        border-radius: 6px;  
+        font-size: 12px;  
+        display: none;  
+    }  
+
+    /* Progress Bar Styles */
+    .progress-container {
+        margin-top: 15px;
+        display: none;
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 20px;
+        background: #f0f0f0;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid #ccc;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(45deg, #4CAF50, #45a049);
+        border-radius: 10px;
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+
+    .progress-text {
+        margin-top: 5px;
+        font-size: 12px;
+        color: #333;
+        font-weight: bold;
+    }
+
+    .upload-status {
+        margin-top: 10px;
+        font-size: 12px;
+        color: #666;
+    }
+</style>  
+</head>  
+<body>  
+<div class="box">  
+    <h3 class="title">Upload Your Image</h3>  
+    <p class="subtext">You can upload and share them for free and unlimited.</p>  
+    <input type="file" id="fileInput" style="display:none;" accept="image/*">  
+
+    <button onclick="selectFile()">SELECT FILE & UPLOAD</button>  
+
+    <!-- Progress Bar -->
+    <div class="progress-container" id="progressContainer">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text" id="progressText">0%</div>
+        <div class="upload-status" id="uploadStatus">Uploading...</div>
+    </div>
+
+    <input type="text" id="imageURL" readonly>  
+
+    <button onclick="copyLink()">COPY LINK</button>
+</div>  
+
+<script>  
+    const API_KEY = "3567d59faf79fbad5fba069da2a6e76b";  
+  
+    function selectFile() {  
+        document.getElementById("fileInput").click();  
+    }  
+  
+    document.getElementById("fileInput").addEventListener("change", function () {  
+        let file = this.files[0];  
+        if (!file) return;  
+
+        // Show progress bar
+        const progressContainer = document.getElementById("progressContainer");
+        const progressFill = document.getElementById("progressFill");
+        const progressText = document.getElementById("progressText");
+        const uploadStatus = document.getElementById("uploadStatus");
+        
+        progressContainer.style.display = "block";
+        progressFill.style.width = "0%";
+        progressText.textContent = "0%";
+        uploadStatus.textContent = "Uploading...";
+
+        let form = new FormData();  
+        form.append("image", file);  
+
+        // Create XMLHttpRequest for progress tracking
+        let xhr = new XMLHttpRequest();
+        
+        // Track upload progress
+        xhr.upload.addEventListener("progress", function(event) {
+            if (event.lengthComputable) {
+                let percentComplete = (event.loaded / event.total) * 100;
+                let percentage = Math.round(percentComplete);
+                
+                progressFill.style.width = percentage + "%";
+                progressText.textContent = percentage + "%";
+                
+                if (percentage === 100) {
+                    uploadStatus.textContent = "Processing...";
+                }
+            }
+        });
+
+        xhr.addEventListener("load", function() {
+            if (xhr.status === 200) {
+                let data = JSON.parse(xhr.responseText);
+                let url = data.data.url;
+                let input = document.getElementById("imageURL");
+                input.style.display = "block";
+                input.value = url;
+                
+                // Update progress to show completion
+                progressFill.style.width = "100%";
+                progressText.textContent = "100%";
+                uploadStatus.textContent = "Upload Complete!";
+                uploadStatus.style.color = "#4CAF50";
+                
+                // Hide progress bar after 2 seconds
+                setTimeout(function() {
+                    progressContainer.style.display = "none";
+                }, 2000);
+            } else {
+                uploadStatus.textContent = "Upload Failed!";
+                uploadStatus.style.color = "#f44336";
+            }
+        });
+
+        xhr.addEventListener("error", function() {
+            uploadStatus.textContent = "Upload Failed!";
+            uploadStatus.style.color = "#f44336";
+        });
+
+        xhr.open("POST", "https://api.imgbb.com/1/upload?key=" + API_KEY);
+        xhr.send(form);
+    });  
+  
+    function copyLink() {  
+        let input = document.getElementById("imageURL");  
+        if (input.value === "") {  
+            alert("Upload an image first!");  
+            return;  
+        }  
+        input.select();  
+        document.execCommand("copy");  
+        alert("Link Copied!");  
+    }  
+</script>  
+</body>  
+</html>
