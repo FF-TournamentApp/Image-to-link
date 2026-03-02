@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "809486637961",
+    "project_id": "exo-battle-app",
+    "storage_bucket": "exo-battle-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:809486637961:android:b5632013f9ac06997fdf58",
+        "android_client_info": {
+          "package_name": "com.exobattle.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBOEJA0Eu37SVK-FW45NB8VwnUQWRjB3R0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
